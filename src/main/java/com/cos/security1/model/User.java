@@ -29,6 +29,10 @@ public class User {
 	private String email;
 	private String role;
 	
+	private String provider; //"google"
+	private String providerid; //google_id
+	
+	
 	@CreationTimestamp
 	private Timestamp createDate;
 	

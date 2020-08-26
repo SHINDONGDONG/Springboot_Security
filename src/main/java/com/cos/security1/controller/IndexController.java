@@ -4,13 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.cos.security1.config.auth.PrincipalDetails;
 import com.cos.security1.model.User;
 import com.cos.security1.repository.UserRepository;
 
@@ -22,6 +27,34 @@ public class IndexController {
 	
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+	@GetMapping("/test/login")
+	public @ResponseBody String loginTest(Authentication authenticateAction,
+			@AuthenticationPrincipal PrincipalDetails userDetails) {
+		System.out.println("/test/login ==================");
+		PrincipalDetails principalDetails = (PrincipalDetails) authenticateAction.getPrincipal();
+		System.out.println("authentication : " + principalDetails.getUser());
+		
+		System.out.println("userdetails : " + userDetails.getUser());
+		return "세션정보확인";
+		
+	}
+	
+	@GetMapping("/test/oauth/login")
+	public @ResponseBody String loginTest(Authentication authenticateAction
+			,@AuthenticationPrincipal OAuth2User oauth) {
+		System.out.println("/test/oauth2/login ==================");
+		OAuth2User oauth2User= (OAuth2User) authenticateAction.getPrincipal();
+		System.out.println("authentication : " + oauth2User.getAttributes());
+		System.out.println("oauth2 : " + oauth.getAttributes());
+		
+		return "oauth 세션정보확인";
+		
+	}
+	
+	//스프링 시큐리티는 자기만의 세션을 들고있다. (시큐리티세션)
+	//userdetails,oauth2user 두개를 한번에 principaldetails 에 임플리먼트하여 두개다 찾을수잇게한다.
+	
 	
 	@GetMapping({"/",""})
 	public String index() {

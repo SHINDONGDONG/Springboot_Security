@@ -1,6 +1,7 @@
 package com.cos.security1.config;
 
 import org.aspectj.weaver.ast.And;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -10,6 +11,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.web.servlet.SecurityMarker;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistration.ProviderDetails.UserInfoEndpoint;
+
+import com.cos.security1.config.oauth.PrincipalOauth2UserService;
 
 @Configuration
 @EnableWebSecurity//스프링 시큐리티 필터가 스프링 필터체인에 등록된다.
@@ -20,6 +24,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public BCryptPasswordEncoder encodePwd() {
 		return new BCryptPasswordEncoder();
 	}
+	
+	@Autowired
+	private PrincipalOauth2UserService principalOauth2UserService;
 	
 	
 	
@@ -35,7 +42,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.formLogin()
 			.loginPage("/loginForm")
 			.loginProcessingUrl("/login") // /login이라는 주소가 호출이되면 시큐리티가 낚아채서 대신 로그인을 진행해준다.
-			.defaultSuccessUrl("/"); //성공하면 이 주소로 이동한다.
+			.defaultSuccessUrl("/") //성공하면 이 주소로 이동한다.
+			.and()
+			.oauth2Login()
+			.loginPage("/loginForm") //구글로그인이 완료된 뒤 후처리가 필요 Tip. 코드X, (엑세스토큰 + 사용자 프로필정보를 한번에 취득)
+			//1.코드받기(인증),2.엑세스토큰받기(권한),3.사용자 프로필정보 취득,4.정보를 토대로 자동회원가입 or 취득정보가 부족할 시  
+			.userInfoEndpoint()
+			.userService(principalOauth2UserService);//oauth2 userservice
 	}
 	
 }
